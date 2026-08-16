@@ -262,17 +262,54 @@
             backdrop-filter: blur(20px);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 20px; margin-bottom: 20px;
-            transition: border-color 0.2s;
+            padding: 20px;
+            margin-bottom: 20px;
         }
-        .add-card:hover { border-color: rgba(99,102,241,0.2); }
         .add-title {
             font-family: var(--font-head);
-            font-size: 14px; font-weight: 700; color: var(--text-primary);
-            margin-bottom: 16px;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 14px;
         }
-        .irow { display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 14px; }
+        .branch-pick {
+            display: flex; gap: 8px; margin-bottom: 14px;
+        }
+        .branch-pick-label {
+            font-size: 11px; font-weight: 700;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.6px; margin-bottom: 8px;
+        }
+        .bp-btn {
+            flex: 1; padding: 10px 14px;
+            border-radius: var(--radius-xs);
+            font-family: var(--font-head);
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; border: 2px solid var(--border);
+            background: var(--bg-elevated); color: var(--text-muted);
+            transition: all 0.25s ease; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .bp-btn:hover { border-color: var(--text-muted); color: var(--text-secondary); }
+        .bp-btn.bp-aiml.sel {
+            background: var(--sky-dim); color: var(--sky);
+            border-color: rgba(56,189,248,0.5);
+            box-shadow: 0 0 16px var(--sky-glow);
+        }
+        .bp-btn.bp-aids.sel {
+            background: var(--emerald-dim); color: var(--emerald);
+            border-color: rgba(52,211,153,0.5);
+            box-shadow: 0 0 16px var(--emerald-glow);
+        }
+        .bp-btn .bp-dot {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; margin-right: 6px; vertical-align: middle;
+        }
+        .bp-aiml .bp-dot { background: var(--sky); }
+        .bp-aids .bp-dot { background: var(--emerald); }
+        .irow {
+            display: grid; grid-template-columns: 100px 1fr; gap: 10px;
+            margin-bottom: 14px;
+        }
         .irow.single { grid-template-columns: 1fr; }
 
         .f-input {
@@ -582,12 +619,21 @@
 
                 <div class="add-card">
                     <div class="add-title">➕ Add New Student</div>
+                    <div class="branch-pick-label">Select Branch</div>
+                    <div class="branch-pick">
+                        <button class="bp-btn bp-aiml" :class="{ sel: addBranch==='AIML' }" @click="addBranch='AIML'">
+                            <span class="bp-dot"></span>AIML
+                        </button>
+                        <button class="bp-btn bp-aids" :class="{ sel: addBranch==='AIDS' }" @click="addBranch='AIDS'">
+                            <span class="bp-dot"></span>AIDS
+                        </button>
+                    </div>
                     <div class="irow">
                         <input class="f-input" type="number" v-model="newRoll" placeholder="Roll No" min="1">
                         <input class="f-input" type="text" v-model="newName" placeholder="Full Name (e.g. SHARMA RAHUL)" @keyup.enter="addStudent">
                     </div>
-                    <button class="btn btn-full" :class="branch==='AIML'?'btn-sky':'btn-em'" @click="addStudent">
-                        Add to {{ branch }}
+                    <button class="btn btn-full" :class="addBranch==='AIML'?'btn-sky':'btn-em'" @click="addStudent">
+                        ➕ Add to {{ addBranch }}
                     </button>
                 </div>
 
@@ -679,7 +725,7 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            pg:'students', branch:'AIML',
+            pg:'students', branch:'AIML', addBranch:'AIML',
             students:[], loading:false,
             newRoll:'', newName:'',
             subjects:[], newSubject:'',
@@ -700,13 +746,21 @@ createApp({
             const j=await r.json();
             this.students=j.students||[]; this.loading=false;
         },
-        switchBranch(b){this.branch=b;this.newRoll='';this.newName='';this.loadStudents();},
+        switchBranch(b){this.branch=b;this.addBranch=b;this.newRoll='';this.newName='';this.loadStudents();},
         async addStudent(){
             if(!this.newRoll||!this.newName.trim()){this.toast('⚠️ Roll No and Name required!');return;}
-            const r=await fetch('/api/student_action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add',roll_no:this.newRoll,name:this.newName.trim(),branch:this.branch})});
+            if(!['AIML','AIDS'].includes(this.addBranch)){this.toast('⚠️ Please select a branch!');return;}
+            const r=await fetch('/api/student_action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add',roll_no:this.newRoll,name:this.newName.trim(),branch:this.addBranch})});
             const j=await r.json();
-            this.toast(j.success?'✅ '+j.message:'❌ '+j.message);
-            if(j.success){this.newRoll='';this.newName='';this.loadStudents();}
+            this.toast(j.success?'✅ Student added to '+this.addBranch+'!':'❌ '+j.message);
+            if(j.success){
+                this.newRoll='';this.newName='';
+                // Switch to the branch where the student was added so it's visible
+                if(this.branch !== this.addBranch) {
+                    this.branch = this.addBranch;
+                }
+                this.loadStudents();
+            }
         },
         async deleteStudent(s){
             if(!confirm(`Delete ${s.name} (Roll ${s.roll_no}) from ${this.branch}?`))return;

@@ -882,40 +882,8 @@
 <script>
 const { createApp } = Vue;
 
-const AIML = {
-    1:"TELAGATHOTI NAVA TEJA",2:"DHOLAKIYA RAJ HARESHBHAI",3:"KOTA DINESH MR. SURENDRA",
-    4:"KURAKULA MANIVENKATA TEJA",5:"NEELAM MANIKANTA",6:"PEDHADIYA KHODIDAS JAMANBHAI",
-    7:"SHAMDAR RAMIZSHA MAHEBUBSHA",8:"MOMIN SAID MEER",9:"SHAIK NEMALIPURI MAHMAD NAZEER",
-    10:"CHEVALA NAGA NARAHARI BABU",11:"MATHANGI MANEESH KUMAR",12:"PATRA SIDDHARDHA",
-    13:"VEMANA PREM KUMAR",14:"JOSHI MRUTYUNJAY AMITBHAI",15:"SAKHRELIYA VANSHIL SANJAYBHAI",
-    16:"VAMAJA RAJ ISHVARBHAI",17:"MAKADIYA KRENSI RAMNIKBHAI",18:"RATHOD SWATI RATILAL",
-    19:"KADAM HARSH ANKUSHBHAI",20:"PRINCEKUMAR SUTHAR",
-    21:"PANDUGU DIKSHITH",22:"CHENNAIHGARI SPANDANA"
-};
-const AIDS = {
-    1:"CHANDANA CHARANYA RATNA PRIYA",2:"DASARI ANUHYA DEVI",3:"GADENAVENI SHIVA",
-    4:"GARAPATI SANJANA PRABHA DEVI",5:"KARIPI SAI DURGA PRAVEEN",6:"KOTTA BALAJI",
-    7:"LINGALA HARINI",8:"MEKALA DIVAKAR REDDY",9:"POLINA MOHITHA",10:"SABBINENI SAGAR",
-    11:"SHAIK HANEEF",12:"JITENDER TAMMINANA",13:"TIRUMALA RAJU BALA VENKATA PAVAN VARMA",
-    14:"VALLEPALLI VASANTH RAJ",15:"BADE ASMITHA SRIJA",16:"CHAKALI KOUSHIK BABU",
-    17:"MADIRA SAI THRIVEDI",18:"NILLA SUVARSHA",19:"PASYAVULA BHARAT RAMA SWAMI",
-    20:"SALA NAGA VENKATA NIKHIL",21:"TALLAPALLE TEJOVANTH VENKATA SAI RAMESH",
-    22:"SATYA KESHIK TUNGALA",23:"BADAM DHEEMANTH REDDY",24:"MADIREDDY LAKSHMI PRASANNA",
-    25:"PALLE NITHIN",26:"PALLE NITHISH",27:"PATHI CHARITHA SRI",28:"RAAVI NETHAJI",
-    29:"BORAD KRISH HARESHBHAI",30:"BURRI SRINU",31:"GURRAM NAGA PHANEENDRA KUMAR",
-    32:"MOLAGAVALLI DINESH PATEL",33:"PARASA PAVAN KUMAR",34:"PUSULURI HEMANTHA LAKSHMI GOPIKA",
-    35:"BYALLA VISHNUVARDHAN",36:"DAGI KISHOR",37:"MURABOYINA MADHU SPANDHANA",
-    38:"PERAM SHYAM SUNDARA REDDY",39:"RALLABANDI VENKATA SUPRAJA",40:"BOSIGARI CHANDRA JAHNAVI",
-    41:"CHIRALA GANESH",42:"PARLAPU VAISHNAVI",43:"SHAIK ISHFAAQ",44:"GANGIREDDY RAKESH REDDY",
-    45:"KANAPARTHI ANURAG",46:"MANGALA ARCHITHA",47:"VELUGURI KARTHIKEYA",
-    48:"GRANDHI NAGA JYOTHI",49:"ATHUPAKAM LOKESH REDDY",50:"GANDHAM JEEVAN",
-    51:"MEENA VENKATA RAGHUNANDAN",52:"GOHIL TANISH KETANBHAI",53:"BHANDERI NENSEE MAHENDRABHAI",
-    54:"GUMMA VENKATA SRINIVASULU",55:"KURUBA PUNITH SAI",
-    56:"CHAVDA MADHAV RAMESHBHAI",57:"PARMAR MEET RAJESHBHAI"
-};
-
 function mk() { return Array.from({length:6},()=>({subject:'',aiml:'',aids:'',aimlLib:false,aidsLib:false})); }
-function prs(s) { if(!s) return []; return [...new Set(s.split(',').map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)))].sort((a,b)=>a-b); }
+function prs(s) { if(!s) return []; return [...new Set(s.split(',').map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)&&x>0))].sort((a,b)=>a-b); }
 function pad(n) { return String(n).padStart(2,'0'); }
 
 createApp({
@@ -924,6 +892,7 @@ createApp({
             theme: 'dark',
             date: new Date().toISOString().split('T')[0],
             slots: mk(), subjects: [],
+            AIML: {}, AIDS: {},
             report: '', copied: false,
             toastOn: false, toastMsg: '',
             sbOpen: false
@@ -946,11 +915,39 @@ createApp({
             document.documentElement.setAttribute('data-theme', 'dark');
         }
 
+        // Fetch subjects
         const r = await fetch('/api/subject_action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list'})});
         const j = await r.json();
         this.subjects = j.subjects || [];
+
+        // Fetch students from DB to build dynamic lookup maps
+        await this.loadStudents();
     },
     methods: {
+        async loadStudents() {
+            try {
+                // Fetch AIML students
+                const rAiml = await fetch('/api/student_action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',branch:'AIML'})});
+                const jAiml = await rAiml.json();
+                const aimlMap = {};
+                if(jAiml.success && jAiml.students) {
+                    jAiml.students.forEach(s => { aimlMap[s.roll_no] = s.name; });
+                }
+                this.AIML = aimlMap;
+
+                // Fetch AIDS students
+                const rAids = await fetch('/api/student_action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',branch:'AIDS'})});
+                const jAids = await rAids.json();
+                const aidsMap = {};
+                if(jAids.success && jAids.students) {
+                    jAids.students.forEach(s => { aidsMap[s.roll_no] = s.name; });
+                }
+                this.AIDS = aidsMap;
+            } catch(e) {
+                console.error('Failed to load students:', e);
+                this.toast('⚠️ Could not load student list');
+            }
+        },
         toggleTheme() {
             this.theme = this.theme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', this.theme);
@@ -968,6 +965,8 @@ createApp({
             let o='=============================\n     ABSENT STUDENT REPORT\n=============================\n\n';
             o+='Date: '+d+'-'+m+'-'+y+'\n\n';
             let has=false;
+            const aimlMap = this.AIML;
+            const aidsMap = this.AIDS;
             this.slots.forEach((s,i)=>{
                 const ar=prs(s.aiml),dr=prs(s.aids);
                 if(!s.subject&&!s.aimlLib&&!s.aidsLib&&ar.length===0&&dr.length===0)return;
@@ -975,11 +974,17 @@ createApp({
                 o+='Subject: '+(s.subject||'Lecture '+(i+1))+'\n\n';
                 o+='AIML:\n';
                 if(s.aimlLib)o+='Library\n';
-                ar.forEach(r=>{if(AIML[r])o+=pad(r)+' - '+AIML[r]+'\n';});
+                ar.forEach(r=>{
+                    const name = aimlMap[r];
+                    o+=pad(r)+' - '+(name || 'Roll '+r)+'\n';
+                });
                 if(!s.aimlLib&&ar.length===0)o+='All Present\n';
                 o+='\nAIDS:\n';
                 if(s.aidsLib)o+='Library\n';
-                dr.forEach(r=>{if(AIDS[r])o+=pad(r)+' - '+AIDS[r]+'\n';});
+                dr.forEach(r=>{
+                    const name = aidsMap[r];
+                    o+=pad(r)+' - '+(name || 'Roll '+r)+'\n';
+                });
                 if(!s.aidsLib&&dr.length===0)o+='All Present\n';
                 o+='\n--------------------------------\n\n';
             });
