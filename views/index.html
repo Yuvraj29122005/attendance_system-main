@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RV Attendance Tracker — Professional attendance tracking for AIML & AIDS branches">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RVTracker">
+    <title>RV Attendance Tracker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/icon-192.svg">
+    <link rel="apple-touch-icon" href="/icon-192.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-head: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Deep space palette */
+            --bg-root: #06080f;
+            --bg-surface: #0d1017;
+            --bg-card: rgba(17,20,30,0.7);
+            --bg-card-solid: #11141e;
+            --bg-elevated: rgba(25,29,42,0.8);
+            --bg-input: rgba(15,18,28,0.9);
+            --bg-hover: rgba(99,102,241,0.06);
+
+            --border: rgba(99,102,241,0.1);
+            --border-subtle: rgba(255,255,255,0.04);
+            --border-active: rgba(99,102,241,0.4);
+
+            /* Indigo-violet accent */
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-glow: rgba(99,102,241,0.25);
+            --accent-dim: rgba(99,102,241,0.12);
+            --gradient-accent: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --gradient-accent-h: linear-gradient(135deg, #818cf8, #a78bfa);
+
+            /* Semantic */
+            --emerald: #34d399;
+            --emerald-dim: rgba(52,211,153,0.12);
+            --emerald-glow: rgba(52,211,153,0.25);
+            --rose: #fb7185;
+            --rose-dim: rgba(251,113,133,0.12);
+            --amber: #fbbf24;
+            --amber-dim: rgba(251,191,36,0.12);
+            --sky: #38bdf8;
+            --sky-dim: rgba(56,189,248,0.12);
+            --sky-glow: rgba(56,189,248,0.25);
+
+            /* Text */
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --text-accent: #a5b4fc;
+
+            /* Layout */
+            --sidebar-w: 260px;
+            --topbar-h: 60px;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --radius-xs: 7px;
+
+            --sb-bg: rgba(10,13,22,0.95);
+            --tb-bg: rgba(10,13,22,0.85);
+            --bnav-bg: rgba(10,13,22,0.9);
+            --shield-bg: #0b0f19;
+            --body-gradient-1: rgba(99,102,241,0.07);
+            --body-gradient-2: rgba(139,92,246,0.05);
+        }
+        [data-theme="light"] {
+            --bg-root: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-card: rgba(255,255,255,0.75);
+            --bg-card-solid: #ffffff;
+            --bg-elevated: rgba(248,250,252,0.9);
+            --bg-input: rgba(241,245,249,0.9);
+            --bg-hover: rgba(99,102,241,0.08);
+
+            --border: rgba(99,102,241,0.15);
+            --border-subtle: rgba(15,23,42,0.05);
+            --border-active: rgba(99,102,241,0.5);
+
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --text-accent: #4f46e5;
+            --accent-light: #4f46e5;
+
+            --sb-bg: rgba(255,255,255,0.95);
+            --tb-bg: rgba(255,255,255,0.85);
+            --bnav-bg: rgba(255,255,255,0.9);
+            --shield-bg: #f8fafc;
+            --body-gradient-1: rgba(99,102,241,0.1);
+            --body-gradient-2: rgba(139,92,246,0.08);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-root);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        button, input, select, textarea { font-family: inherit; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Animated background mesh */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 10%, var(--body-gradient-1), transparent),
+                radial-gradient(ellipse 500px 350px at 80% 80%, var(--body-gradient-2), transparent);
+            pointer-events: none;
+        }
+
+        /* ══════════════ LAYOUT ══════════════ */
+        .shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--sb-bg);
+            backdrop-filter: blur(24px);
+            display: flex; flex-direction: column;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            border-right: 1px solid var(--border);
+        }
+        .sb-brand {
+            padding: 22px 22px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sb-brand-row { display: flex; align-items: center; gap: 12px; }
+        .sb-logo {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 25px rgba(99,102,241,0.45);
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 1px solid rgba(129,140,248,0.3);
+            background: var(--shield-bg);
+        }
+        .sb-logo img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .sb-brand-info h2 {
+            font-family: var(--font-head);
+            font-size: 16px; font-weight: 800; letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #fff, var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sb-brand-info span {
+            font-size: 11px; color: var(--text-muted); font-weight: 500;
+        }
+
+        .sb-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+        .sb-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 1.4px;
+            text-transform: uppercase; color: var(--text-muted);
+            padding: 18px 12px 8px;
+        }
+        .sb-item {
+            display: flex; align-items: center; gap: 11px;
+            padding: 11px 14px; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 500; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s;
+            position: relative; border: 1px solid transparent;
+        }
+        .sb-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+        .sb-item.active {
+            background: var(--accent-dim);
+            color: var(--accent-light);
+            border-color: var(--border-active);
+        }
+        .sb-item.active::before {
+            content: '';
+            position: absolute; left: -1px; top: 50%;
+            transform: translateY(-50%);
+            width: 3px; height: 22px;
+            background: var(--gradient-accent);
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+        .sb-icon { width: 18px; text-align: center; font-size: 15px; flex-shrink: 0; }
+
+        .sb-footer {
+            padding: 16px 18px;
+            border-top: 1px solid var(--border);
+        }
+        .sb-stat {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px 0; font-size: 12px;
+        }
+        .sb-stat-label { color: var(--text-muted); font-weight: 500; }
+        .sb-stat-val { font-weight: 700; color: var(--accent-light); font-variant-numeric: tabular-nums; }
+
+        .sb-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); z-index: 99;
+            backdrop-filter: blur(6px);
+        }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1; margin-left: var(--sidebar-w);
+            display: flex; flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            height: var(--topbar-h);
+            background: var(--tb-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .tb-left { display: flex; align-items: center; gap: 14px; }
+        .tb-hamburger {
+            display: none; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: var(--text-secondary); padding: 4px;
+        }
+        .tb-brand-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 5px 14px 5px 6px;
+            background: rgba(99,102,241,0.14);
+            border: 1.5px solid rgba(99,102,241,0.35);
+            border-radius: 12px; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tb-brand-badge:hover {
+            background: rgba(99,102,241,0.22);
+            border-color: rgba(99,102,241,0.6);
+            box-shadow: 0 0 16px var(--accent-glow);
+        }
+        .tb-logo-img {
+            width: 32px; height: 32px; border-radius: 8px;
+            object-fit: cover; flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(99,102,241,0.5);
+            border: 1px solid rgba(129,140,248,0.4);
+        }
+        .tb-brand-text { display: flex; flex-direction: column; }
+        .tb-brand-title {
+            font-family: var(--font-head); font-weight: 800; font-size: 14px;
+            line-height: 1.2;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .tb-brand-sub {
+            font-size: 10px; color: var(--text-muted); font-weight: 600;
+        }
+        .tb-title-box { display: flex; flex-direction: column; margin-left: 6px; padding-left: 12px; border-left: 1px solid var(--border); }
+        .tb-title {
+            font-family: var(--font-head);
+            font-size: 15px; font-weight: 700; color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .tb-crumb {
+            font-size: 11px; color: var(--text-muted);
+            display: flex; align-items: center; gap: 5px; margin-top: 1px;
+        }
+        .tb-crumb b { color: var(--text-secondary); font-weight: 600; }
+        .tb-right { display: flex; align-items: center; gap: 12px; }
+        .tb-theme-toggle {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; transition: all 0.2s;
+        }
+        .tb-theme-toggle:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-active);
+        }
+        .tb-date-pill {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+            background: var(--bg-elevated);
+            padding: 7px 14px; border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        /* ── PAGE ── */
+        .page { flex: 1; padding: 24px 28px 48px; max-width: 1200px; width: 100%; }
+
+        /* ══════════════ DATE PICKER ══════════════ */
+        .date-bar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex; align-items: center; gap: 14px;
+            transition: border-color 0.2s;
+        }
+        .date-bar:hover { border-color: var(--border-active); }
+        .date-bar-icon {
+            width: 44px; height: 44px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .date-bar-info { flex: 1; }
+        .date-bar-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+        .date-bar-value { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 1px; }
+        .date-input {
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 14px; font-weight: 600;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            outline: none; cursor: pointer;
+            transition: all 0.2s;
+            color-scheme: dark;
+        }
+        .date-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* ══════════════ SECTION HEADERS ══════════════ */
+        .sec-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .sec-head h2 {
+            font-family: var(--font-head);
+            font-size: 15px; font-weight: 700; color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sec-dot {
+            width: 8px; height: 8px;
+            background: var(--gradient-accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+        .sec-count { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+        /* ══════════════ SLOT CARDS ══════════════ */
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .slot {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .slot:hover {
+            border-color: rgba(99,102,241,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .slot.filled {
+            border-color: var(--border-active);
+            box-shadow: 0 0 0 1px var(--border-active), 0 4px 24px var(--accent-glow);
+        }
+        .slot-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .slot-top-left { display: flex; align-items: center; gap: 10px; }
+        .slot-num {
+            width: 32px; height: 32px;
+            background: var(--gradient-accent);
+            color: white;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-head);
+            font-size: 13px; font-weight: 800;
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+        .slot-name {
+            font-family: var(--font-head);
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+        }
+        .slot-absent-tag {
+            font-size: 10px; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px;
+            background: var(--rose-dim); color: var(--rose);
+            border: 1px solid rgba(251,113,133,0.2);
+        }
+        .slot-body { padding: 16px; }
+
+        /* ── Form fields ── */
+        .fg { margin-bottom: 14px; }
+        .fg:last-child { margin-bottom: 0; }
+        .fg-label {
+            display: block; font-size: 10px; font-weight: 700;
+            color: var(--text-muted); margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .sel-wrap { position: relative; }
+        .sel-wrap::after {
+            content: '▾'; position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted); font-size: 12px;
+            pointer-events: none;
+        }
+        .f-select {
+            width: 100%; padding: 10px 36px 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 13px; font-weight: 500;
+            color: var(--text-primary); background: var(--bg-input);
+            cursor: pointer; outline: none;
+            appearance: none; -webkit-appearance: none;
+            transition: all 0.2s;
+        }
+        .f-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .f-select option { background: var(--bg-card-solid); color: var(--text-primary); }
+
+        .branch-row {
+            display: grid;
+            grid-template-columns: 46px 1fr auto;
+            gap: 8px; align-items: center;
+            margin-bottom: 8px;
+        }
+        .branch-row:last-child { margin-bottom: 0; }
+        .br-tag {
+            font-size: 9px; font-weight: 800;
+            color: white; text-align: center;
+            padding: 8px 2px; border-radius: 7px;
+            letter-spacing: 0.8px;
+        }
+        .br-aiml { background: linear-gradient(135deg, #38bdf8, #0284c7); box-shadow: 0 2px 8px var(--sky-glow); }
+        .br-aids { background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 2px 8px var(--emerald-glow); }
+
+        .f-input {
+            width: 100%; padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 13px; font-weight: 500;
+            color: var(--text-primary); background: var(--bg-input);
+            outline: none; min-width: 0;
+            transition: all 0.2s;
+        }
+        .f-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .f-input:disabled {
+            opacity: 0.4; cursor: not-allowed;
+        }
+        .f-input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+        .lib-btn {
+            padding: 8px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 10px; font-weight: 700;
+            cursor: pointer; white-space: nowrap;
+            background: var(--bg-elevated); color: var(--text-muted);
+            transition: all 0.2s; letter-spacing: 0.3px;
+        }
+        .lib-btn:hover { border-color: var(--amber); color: var(--amber); }
+        .lib-btn.on {
+            background: var(--amber-dim); color: var(--amber);
+            border-color: rgba(251,191,36,0.4);
+        }
+
+        /* ══════════════ ACTION BAR ══════════════ */
+        .action-bar { display: flex; gap: 12px; margin-bottom: 28px; }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 13px 24px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-head);
+            font-size: 14px; font-weight: 700;
+            cursor: pointer; border: none;
+            transition: all 0.2s;
+            letter-spacing: -0.1px;
+            position: relative; overflow: hidden;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-accent {
+            background: var(--gradient-accent);
+            color: white;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .btn-accent:hover { box-shadow: 0 6px 28px rgba(99,102,241,0.4); transform: translateY(-1px); }
+        .btn-emerald {
+            background: linear-gradient(135deg, #059669, #34d399);
+            color: white;
+            box-shadow: 0 4px 20px var(--emerald-glow);
+        }
+        .btn-emerald:hover { box-shadow: 0 6px 28px rgba(52,211,153,0.4); transform: translateY(-1px); }
+        .btn-ghost {
+            background: var(--bg-elevated); color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+        }
+        .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-primary); }
+        .btn-fill { flex: 1; }
+
+        /* ══════════════ REPORT ══════════════ */
+        .rpt {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            animation: fadeSlideUp 0.3s ease;
+        }
+        .rpt-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .rpt-head-left {
+            display: flex; align-items: center; gap: 8px;
+            font-family: var(--font-head);
+            font-size: 14px; font-weight: 700; color: var(--text-primary);
+        }
+        .rpt-body { padding: 20px; }
+        .rpt-text {
+            width: 100%; min-height: 300px; resize: vertical;
+            padding: 16px; border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-family: var(--font-mono);
+            font-size: 12px; line-height: 1.8;
+            color: var(--text-primary); background: var(--bg-input);
+            outline: none;
+        }
+        .rpt-text:focus { border-color: var(--accent); }
+        .btn-copy {
+            padding: 8px 16px; border-radius: var(--radius-xs);
+            background: var(--gradient-accent); color: white;
+            border: none; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            font-family: var(--font-head);
+        }
+        .btn-copy:hover { box-shadow: 0 2px 12px var(--accent-glow); }
+        .btn-copy.copied { background: linear-gradient(135deg, #059669, #34d399); }
+
+        /* ══════════════ TOAST ══════════════ */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg-card-solid); color: var(--text-primary);
+            padding: 12px 28px; border-radius: 12px;
+            font-size: 13px; font-weight: 600;
+            z-index: 9999; white-space: nowrap;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-active);
+            pointer-events: none; opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ══════════════ BOTTOM NAV ══════════════ */
+        .bnav {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--bnav-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            z-index: 100; padding: 6px 0;
+            padding-bottom: max(6px, env(safe-area-inset-bottom));
+        }
+        .bnav-inner { display: flex; justify-content: space-around; align-items: center; }
+        .bnav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 8px 16px; font-size: 10px; font-weight: 700;
+            color: var(--text-muted); cursor: pointer;
+            border: none; background: none;
+            letter-spacing: 0.3px; transition: color 0.2s;
+        }
+        .bnav-item.on { color: var(--accent-light); }
+        .bnav-item .bi { font-size: 20px; }
+        .bnav-dot {
+            width: 4px; height: 4px;
+            background: var(--accent); border-radius: 50%;
+            margin-top: 2px; opacity: 0;
+            box-shadow: 0 0 6px var(--accent-glow);
+        }
+        .bnav-item.on .bnav-dot { opacity: 1; }
+
+        /* ══════════════ PWA INSTALL BANNER ══════════════ */
+        .install-banner {
+            display: none; position: fixed; bottom: 72px; left: 12px; right: 12px;
+            background: var(--bg-card-solid); border: 1px solid var(--border-active);
+            border-radius: var(--radius); padding: 14px 18px;
+            z-index: 110; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+            animation: fadeSlideUp 0.3s ease;
+        }
+        .install-banner-row { display: flex; align-items: center; gap: 12px; }
+        .install-banner-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--gradient-accent);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-head); font-weight: 900; font-size: 14px; color: white;
+            flex-shrink: 0;
+        }
+        .install-banner-text { flex: 1; }
+        .install-banner-text strong { font-family: var(--font-head); font-size: 13px; color: var(--text-primary); display: block; }
+        .install-banner-text span { font-size: 11px; color: var(--text-muted); }
+        .install-btn {
+            padding: 8px 16px; border-radius: var(--radius-xs);
+            background: var(--gradient-accent); color: white;
+            border: none; font-size: 12px; font-weight: 700;
+            cursor: pointer; font-family: var(--font-head);
+            white-space: nowrap;
+        }
+        .install-dismiss {
+            background: none; border: none; color: var(--text-muted);
+            font-size: 16px; cursor: pointer; padding: 4px;
+        }
+
+        /* ══════════════ ANIMATIONS ══════════════ */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page > * { animation: fadeSlideUp 0.4s ease backwards; }
+        .page > *:nth-child(1) { animation-delay: 0.05s; }
+        .page > *:nth-child(2) { animation-delay: 0.1s; }
+        .page > *:nth-child(3) { animation-delay: 0.15s; }
+        .page > *:nth-child(4) { animation-delay: 0.2s; }
+
+        /* ══════════════ RESPONSIVE ══════════════ */
+        @media (max-width: 1023px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sb-overlay.open { display: block; }
+            .main { margin-left: 0; }
+            .tb-hamburger { display: flex; }
+            .topbar { padding: 0 20px; }
+            .page { padding: 20px; }
+            .slots-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 767px) {
+            .sidebar { display: none; }
+            .sb-overlay { display: none !important; }
+            .tb-hamburger { display: none; }
+            .bnav { display: block; }
+            .topbar { padding: 0 14px; height: 58px; }
+            .tb-crumb { display: none; }
+            .tb-date-pill { display: none; }
+            .tb-brand-badge { padding: 4px 8px 4px 4px; }
+            .tb-logo-img { width: 28px; height: 28px; }
+            .tb-brand-title { font-size: 13px; }
+            .tb-brand-sub { display: none; }
+            .tb-title-box { padding-left: 8px; margin-left: 4px; }
+            .tb-title { font-size: 13px; }
+            .page { padding: 14px 14px 110px; }
+            .slots-grid { grid-template-columns: 1fr; gap: 12px; }
+            .date-bar { padding: 12px 14px; gap: 10px; }
+            .date-bar-info { display: none; }
+            .date-input { flex: 1; }
+            .action-bar { flex-direction: column; gap: 8px; }
+            .btn { padding: 14px 20px; }
+            .slot-body { padding: 14px; }
+            .slot-top { padding: 10px 14px; }
+            .branch-row { grid-template-columns: 40px 1fr auto; gap: 6px; }
+            .br-tag { padding: 7px 2px; font-size: 8px; }
+            .lib-btn { padding: 7px 8px; font-size: 9px; }
+            .rpt-body { padding: 14px; }
+            .rpt-text { font-size: 11px; min-height: 240px; }
+            .toast { bottom: 76px; }
+            .sec-head { margin-bottom: 12px; }
+            .install-banner { bottom: 64px; left: 8px; right: 8px; }
+        }
+        @media (max-width: 374px) {
+            .branch-row { grid-template-columns: 34px 1fr auto; }
+            .lib-btn { padding: 7px 5px; font-size: 8px; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+<div class="shell">
+
+    <!-- ══ SIDEBAR ══ -->
+    <div class="sb-overlay" :class="{ open: sbOpen }" @click="sbOpen=false"></div>
+    <aside class="sidebar" :class="{ open: sbOpen }">
+        <div class="sb-brand">
+            <div class="sb-brand-row">
+                <div class="sb-logo"><img src="/icon-192.svg" alt="RV Logo"></div>
+                <div class="sb-brand-info">
+                    <h2>RV Attendance</h2>
+                    <span>3rd Year · AIML & AIDS</span>
+                </div>
+            </div>
+        </div>
+        <nav class="sb-nav">
+            <div class="sb-label">Navigation</div>
+            <a href="/" class="sb-item active">
+                <span class="sb-icon">📝</span> Mark Attendance
+            </a>
+            <a href="/students" class="sb-item">
+                <span class="sb-icon">👥</span> Students
+            </a>
+            <a href="/students?tab=subjects" class="sb-item">
+                <span class="sb-icon">📚</span> Subjects
+            </a>
+        </nav>
+        <div class="sb-footer">
+            <div class="sb-stat">
+                <span class="sb-stat-label">AIML</span>
+                <span class="sb-stat-val">22</span>
+            </div>
+            <div class="sb-stat">
+                <span class="sb-stat-label">AIDS</span>
+                <span class="sb-stat-val">57</span>
+            </div>
+            <div class="sb-stat">
+                <span class="sb-stat-label">Slots</span>
+                <span class="sb-stat-val">6</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <div class="main">
+        <header class="topbar">
+            <div class="tb-left">
+                <button class="tb-hamburger" @click="sbOpen=!sbOpen">☰</button>
+                <a href="/" class="tb-brand-badge">
+                    <img src="/icon-192.svg" alt="RV" class="tb-logo-img">
+                    <div class="tb-brand-text">
+                        <span class="tb-brand-title">RV Attendance</span>
+                        <span class="tb-brand-sub">Tracker</span>
+                    </div>
+                </a>
+                <div class="tb-title-box">
+                    <div class="tb-title">Mark Attendance</div>
+                    <div class="tb-crumb">Home <span>›</span> <b>Attendance</b></div>
+                </div>
+            </div>
+            <div class="tb-right">
+                <button class="tb-theme-toggle" @click="toggleTheme">{{ theme === 'dark' ? '☀️' : '🌙' }}</button>
+                <div class="tb-date-pill">📅 {{ fmtDate }}</div>
+            </div>
+        </header>
+
+        <main class="page">
+            <!-- Date Picker -->
+            <div class="date-bar">
+                <div class="date-bar-icon">📅</div>
+                <div class="date-bar-info">
+                    <div class="date-bar-label">Attendance Date</div>
+                    <div class="date-bar-value">{{ fmtDate }}</div>
+                </div>
+                <input type="date" class="date-input" v-model="date">
+            </div>
+
+            <!-- Section Header -->
+            <div class="sec-head">
+                <h2><span class="sec-dot"></span> Time Slots</h2>
+                <span class="sec-count">6 slots</span>
+            </div>
+
+            <!-- Slots Grid -->
+            <div class="slots-grid">
+                <div v-for="(s, i) in slots" :key="i"
+                     class="slot" :class="{ filled: isActive(s) }">
+                    <div class="slot-top">
+                        <div class="slot-top-left">
+                            <div class="slot-num">{{ i+1 }}</div>
+                            <span class="slot-name">{{ s.subject || 'Slot '+(i+1) }}</span>
+                        </div>
+                        <span class="slot-absent-tag" v-if="absentCount(s)>0">{{ absentCount(s) }} absent</span>
+                    </div>
+                    <div class="slot-body">
+                        <div class="fg">
+                            <label class="fg-label">Subject</label>
+                            <div class="sel-wrap">
+                                <select class="f-select" v-model="s.subject">
+                                    <option value="">— Select Subject —</option>
+                                    <option v-for="sub in subjects" :key="sub.id" :value="sub.name">{{ sub.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="fg-label">Absent Roll Numbers</label>
+                        <div class="branch-row">
+                            <span class="br-tag br-aiml">AIML</span>
+                            <input type="text" inputmode="numeric" class="f-input"
+                                v-model="s.aiml" :disabled="s.aimlLib"
+                                :placeholder="s.aimlLib ? 'Library' : 'e.g. 1, 3, 5'">
+                            <button class="lib-btn" :class="{ on: s.aimlLib }"
+                                @click="togLib(s,'aiml')">{{ s.aimlLib ? '✓ LIB' : 'LIB' }}</button>
+                        </div>
+                        <div class="branch-row">
+                            <span class="br-tag br-aids">AIDS</span>
+                            <input type="text" inputmode="numeric" class="f-input"
+                                v-model="s.aids" :disabled="s.aidsLib"
+                                :placeholder="s.aidsLib ? 'Library' : 'e.g. 1, 3, 5'">
+                            <button class="lib-btn" :class="{ on: s.aidsLib }"
+                                @click="togLib(s,'aids')">{{ s.aidsLib ? '✓ LIB' : 'LIB' }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-bar">
+                <button class="btn btn-accent btn-fill" @click="genReport">⚡ Generate Report</button>
+                <button class="btn btn-emerald btn-fill" @click="saveToDb">💾 Save to DB</button>
+                <button class="btn btn-ghost btn-fill" @click="resetAll">↺ Reset All</button>
+            </div>
+
+            <!-- Report -->
+            <div class="rpt" v-if="report">
+                <div class="rpt-head">
+                    <div class="rpt-head-left">📄 Absent Student Report</div>
+                    <button class="btn-copy" :class="{ copied }" @click="copyRpt">
+                        {{ copied ? '✓ Copied' : '📋 Copy' }}
+                    </button>
+                </div>
+                <div class="rpt-body">
+                    <textarea class="rpt-text" readonly :value="report"></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Mobile Nav -->
+<nav class="bnav">
+    <div class="bnav-inner">
+        <a href="/" class="bnav-item on"><span class="bi">📝</span>Attendance<span class="bnav-dot"></span></a>
+        <a href="/students" class="bnav-item"><span class="bi">👥</span>Students<span class="bnav-dot"></span></a>
+        <a href="/students?tab=subjects" class="bnav-item"><span class="bi">📚</span>Subjects<span class="bnav-dot"></span></a>
+    </div>
+</nav>
+
+<!-- Install Banner -->
+<div class="install-banner" id="installBanner">
+    <div class="install-banner-row">
+        <div class="install-banner-icon" style="overflow:hidden;padding:0;background:transparent;"><img src="/icon-192.svg" alt="RV" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"></div>
+        <div class="install-banner-text">
+            <strong>Install RV Tracker</strong>
+            <span>Add to home screen for quick access</span>
+        </div>
+        <button class="install-btn" id="installBtn">Install</button>
+        <button class="install-dismiss" id="dismissInstall">✕</button>
+    </div>
+</div>
+
+<div class="toast" :class="{ show: toastOn }">{{ toastMsg }}</div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+const { createApp } = Vue;
+
+const AIML = {
+    1:"TELAGATHOTI NAVA TEJA",2:"DHOLAKIYA RAJ HARESHBHAI",3:"KOTA DINESH MR. SURENDRA",
+    4:"KURAKULA MANIVENKATA TEJA",5:"NEELAM MANIKANTA",6:"PEDHADIYA KHODIDAS JAMANBHAI",
+    7:"SHAMDAR RAMIZSHA MAHEBUBSHA",8:"MOMIN SAID MEER",9:"SHAIK NEMALIPURI MAHMAD NAZEER",
+    10:"CHEVALA NAGA NARAHARI BABU",11:"MATHANGI MANEESH KUMAR",12:"PATRA SIDDHARDHA",
+    13:"VEMANA PREM KUMAR",14:"JOSHI MRUTYUNJAY AMITBHAI",15:"SAKHRELIYA VANSHIL SANJAYBHAI",
+    16:"VAMAJA RAJ ISHVARBHAI",17:"MAKADIYA KRENSI RAMNIKBHAI",18:"RATHOD SWATI RATILAL",
+    19:"KADAM HARSH ANKUSHBHAI",20:"PRINCEKUMAR SUTHAR",
+    21:"PANDUGU DIKSHITH",22:"CHENNAIHGARI SPANDANA"
+};
+const AIDS = {
+    1:"CHANDANA CHARANYA RATNA PRIYA",2:"DASARI ANUHYA DEVI",3:"GADENAVENI SHIVA",
+    4:"GARAPATI SANJANA PRABHA DEVI",5:"KARIPI SAI DURGA PRAVEEN",6:"KOTTA BALAJI",
+    7:"LINGALA HARINI",8:"MEKALA DIVAKAR REDDY",9:"POLINA MOHITHA",10:"SABBINENI SAGAR",
+    11:"SHAIK HANEEF",12:"JITENDER TAMMINANA",13:"TIRUMALA RAJU BALA VENKATA PAVAN VARMA",
+    14:"VALLEPALLI VASANTH RAJ",15:"BADE ASMITHA SRIJA",16:"CHAKALI KOUSHIK BABU",
+    17:"MADIRA SAI THRIVEDI",18:"NILLA SUVARSHA",19:"PASYAVULA BHARAT RAMA SWAMI",
+    20:"SALA NAGA VENKATA NIKHIL",21:"TALLAPALLE TEJOVANTH VENKATA SAI RAMESH",
+    22:"SATYA KESHIK TUNGALA",23:"BADAM DHEEMANTH REDDY",24:"MADIREDDY LAKSHMI PRASANNA",
+    25:"PALLE NITHIN",26:"PALLE NITHISH",27:"PATHI CHARITHA SRI",28:"RAAVI NETHAJI",
+    29:"BORAD KRISH HARESHBHAI",30:"BURRI SRINU",31:"GURRAM NAGA PHANEENDRA KUMAR",
+    32:"MOLAGAVALLI DINESH PATEL",33:"PARASA PAVAN KUMAR",34:"PUSULURI HEMANTHA LAKSHMI GOPIKA",
+    35:"BYALLA VISHNUVARDHAN",36:"DAGI KISHOR",37:"MURABOYINA MADHU SPANDHANA",
+    38:"PERAM SHYAM SUNDARA REDDY",39:"RALLABANDI VENKATA SUPRAJA",40:"BOSIGARI CHANDRA JAHNAVI",
+    41:"CHIRALA GANESH",42:"PARLAPU VAISHNAVI",43:"SHAIK ISHFAAQ",44:"GANGIREDDY RAKESH REDDY",
+    45:"KANAPARTHI ANURAG",46:"MANGALA ARCHITHA",47:"VELUGURI KARTHIKEYA",
+    48:"GRANDHI NAGA JYOTHI",49:"ATHUPAKAM LOKESH REDDY",50:"GANDHAM JEEVAN",
+    51:"MEENA VENKATA RAGHUNANDAN",52:"GOHIL TANISH KETANBHAI",53:"BHANDERI NENSEE MAHENDRABHAI",
+    54:"GUMMA VENKATA SRINIVASULU",55:"KURUBA PUNITH SAI",
+    56:"CHAVDA MADHAV RAMESHBHAI",57:"PARMAR MEET RAJESHBHAI"
+};
+
+function mk() { return Array.from({length:6},()=>({subject:'',aiml:'',aids:'',aimlLib:false,aidsLib:false})); }
+function prs(s) { if(!s) return []; return [...new Set(s.split(',').map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)))].sort((a,b)=>a-b); }
+function pad(n) { return String(n).padStart(2,'0'); }
+
+createApp({
+    data() {
+        return {
+            theme: 'dark',
+            date: new Date().toISOString().split('T')[0],
+            slots: mk(), subjects: [],
+            report: '', copied: false,
+            toastOn: false, toastMsg: '',
+            sbOpen: false
+        };
+    },
+    computed: {
+        fmtDate() {
+            if (!this.date) return '';
+            const d = new Date(this.date+'T00:00:00');
+            return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+        }
+    },
+    async mounted() {
+        const savedTheme = localStorage.getItem('rvTheme');
+        if (savedTheme) {
+            this.theme = savedTheme;
+            document.documentElement.setAttribute('data-theme', this.theme);
+        } else {
+            this.theme = 'dark';
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        const r = await fetch('/api/subject_action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list'})});
+        const j = await r.json();
+        this.subjects = j.subjects || [];
+    },
+    methods: {
+        toggleTheme() {
+            this.theme = this.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', this.theme);
+            localStorage.setItem('rvTheme', this.theme);
+        },
+        togLib(s,b) {
+            if(b==='aiml'){s.aimlLib=!s.aimlLib;if(s.aimlLib)s.aiml='';}
+            else{s.aidsLib=!s.aidsLib;if(s.aidsLib)s.aids='';}
+        },
+        isActive(s) { return !!(s.subject||s.aiml||s.aids||s.aimlLib||s.aidsLib); },
+        absentCount(s) { return prs(s.aiml).length+prs(s.aids).length; },
+        genReport() {
+            if(!this.date){this.toast('⚠️ Please select a date!');return;}
+            const [y,m,d]=this.date.split('-');
+            let o='=============================\n     ABSENT STUDENT REPORT\n=============================\n\n';
+            o+='Date: '+d+'-'+m+'-'+y+'\n\n';
+            let has=false;
+            this.slots.forEach((s,i)=>{
+                const ar=prs(s.aiml),dr=prs(s.aids);
+                if(!s.subject&&!s.aimlLib&&!s.aidsLib&&ar.length===0&&dr.length===0)return;
+                has=true;
+                o+='Subject: '+(s.subject||'Lecture '+(i+1))+'\n\n';
+                o+='AIML:\n';
+                if(s.aimlLib)o+='Library\n';
+                ar.forEach(r=>{if(AIML[r])o+=pad(r)+' - '+AIML[r]+'\n';});
+                if(!s.aimlLib&&ar.length===0)o+='All Present\n';
+                o+='\nAIDS:\n';
+                if(s.aidsLib)o+='Library\n';
+                dr.forEach(r=>{if(AIDS[r])o+=pad(r)+' - '+AIDS[r]+'\n';});
+                if(!s.aidsLib&&dr.length===0)o+='All Present\n';
+                o+='\n--------------------------------\n\n';
+            });
+            if(!has){this.toast('⚠️ No data entered!');return;}
+            this.report=o;
+            this.$nextTick(()=>document.querySelector('.rpt')?.scrollIntoView({behavior:'smooth'}));
+        },
+        async saveToDb() {
+            if(!this.date){this.toast('⚠️ Please select a date!');return;}
+            if(!this.slots.some(s=>s.subject||s.aiml||s.aids||s.aimlLib||s.aidsLib)){this.toast('⚠️ No data to save!');return;}
+            try {
+                const r=await fetch('/api/save_attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:this.date,slots:this.slots})});
+                const j=await r.json();
+                this.toast(j.success?'✅ Saved to database!':'❌ '+j.message);
+            } catch(e){this.toast('❌ Save failed!');}
+        },
+        copyRpt() {
+            navigator.clipboard.writeText(this.report).then(()=>{
+                this.copied=true; this.toast('✅ Report copied!');
+                setTimeout(()=>{this.copied=false;},2000);
+            }).catch(()=>this.toast('❌ Copy failed!'));
+        },
+        resetAll() {
+            this.slots=mk(); this.report=''; this.copied=false;
+            this.toast('↺ Reset done!');
+        },
+        toast(msg) {
+            this.toastMsg=msg; this.toastOn=true;
+            setTimeout(()=>{this.toastOn=false;},2200);
+        }
+    }
+}).mount('#app');
+
+// ── PWA Service Worker + Install ──
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').style.display = 'block';
+});
+document.getElementById('installBtn')?.addEventListener('click', () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+            deferredPrompt = null;
+            document.getElementById('installBanner').style.display = 'none';
+        });
+    }
+});
+document.getElementById('dismissInstall')?.addEventListener('click', () => {
+    document.getElementById('installBanner').style.display = 'none';
+});
+</script>
+</body>
+</html>

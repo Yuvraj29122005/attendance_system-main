@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="512" height="512">
+  <defs>
+    <linearGradient id="rvBg512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="rvGrad1_512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="rvGrad2_512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <linearGradient id="rvBorder512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="192" height="192" rx="44" fill="url(#rvBg512)"/>
+  <rect x="5" y="5" width="182" height="182" rx="39" fill="none" stroke="url(#rvBorder512)" stroke-width="3" stroke-opacity="0.8"/>
+  <circle cx="96" cy="96" r="60" fill="#6366f1" opacity="0.25"/>
+
+  <path d="M 96,28 C 138,28 158,42 158,80 C 158,128 112,156 96,168 C 80,156 34,128 34,80 C 34,42 54,28 96,28 Z" 
+        fill="#0b0f19" fill-opacity="0.9" stroke="url(#rvBorder512)" stroke-width="2"/>
+
+  <path d="M 60,65 L 90,65 C 102,65 110,72 110,84 C 110,96 102,103 90,103 L 74,103 L 74,128 L 60,128 Z M 74,78 L 74,90 L 88,90 C 94,90 97,87 97,84 C 97,81 94,78 88,78 Z" 
+        fill="url(#rvGrad1_512)"/>
+  <path d="M 85,99 L 106,128 L 122,128 L 99,97 Z" fill="url(#rvGrad1_512)"/>
+
+  <path d="M 103,65 L 117,65 L 134,108 L 151,65 L 165,65 L 141,128 L 127,128 Z" fill="url(#rvGrad2_512)"/>
+
+  <circle cx="96" cy="46" r="4" fill="#38bdf8"/>
+  <path d="M 83,148 L 93,158 L 115,134" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
